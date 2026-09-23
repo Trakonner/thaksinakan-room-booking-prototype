@@ -5,6 +5,95 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>ระบบจองห้องพักและห้องประชุม ทักษิณาคาร</title>
     <link rel="stylesheet" href="style.css" />
+    <style>
+      .auth-hero {
+        max-width: 900px;
+        margin: 0 auto 24px;
+        text-align: center;
+      }
+      .auth-hero h1 {
+        margin-bottom: 8px;
+      }
+      .auth-hero p {
+        color: var(--muted);
+      }
+      .auth-card {
+        position: relative;
+        overflow: hidden;
+      }
+      .auth-card.primary-auth {
+        border: 2px solid var(--primary);
+        box-shadow: 0 18px 45px rgba(31, 95, 191, 0.16);
+      }
+      .role-switch {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+        background: #eef4ff;
+        border-radius: 14px;
+        padding: 6px;
+        margin: 18px 0 22px;
+      }
+      .role-option {
+        border: 0;
+        border-radius: 10px;
+        padding: 12px;
+        background: transparent;
+        color: var(--muted);
+        font-weight: 700;
+        cursor: pointer;
+      }
+      .role-option.active {
+        background: #fff;
+        color: var(--primary-dark);
+        box-shadow: 0 4px 12px rgba(31, 95, 191, 0.12);
+      }
+      .role-hint {
+        background: #f8faff;
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 12px;
+        margin: 14px 0;
+        color: var(--muted);
+        font-size: 0.9rem;
+      }
+      .role-hint strong {
+        color: var(--primary-dark);
+      }
+      .auth-card .form-row {
+        margin-bottom: 14px;
+      }
+      .auth-card input,
+      .auth-card select {
+        background: #fff;
+      }
+      .login-submit {
+        font-size: 1rem;
+        padding: 13px;
+      }
+      .auth-divider {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        color: var(--muted);
+        margin: 22px 0;
+      }
+      .auth-divider:before,
+      .auth-divider:after {
+        content: "";
+        height: 1px;
+        background: var(--border);
+        flex: 1;
+      }
+      @media (max-width: 700px) {
+        .role-switch {
+          grid-template-columns: 1fr;
+        }
+        .auth-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
   </head>
   <body>
     <div class="app-shell">
@@ -16,12 +105,14 @@
             <small>ระบบจองห้องพักและห้องประชุม</small>
           </div>
         </div>
+
         <nav class="main-nav">
           <button class="nav-btn active" data-view="home">หน้าหลัก</button>
           <button class="nav-btn" data-view="search">ค้นหาห้องว่าง</button>
           <button class="nav-btn" data-view="booking">จองห้อง</button>
           <button class="nav-btn" data-view="history">ประวัติการจอง</button>
         </nav>
+
         <div class="top-actions">
           <span id="userBadge" class="user-badge">ยังไม่ได้เข้าสู่ระบบ</span>
           <button class="primary-btn" id="loginButton">เข้าสู่ระบบ</button>
@@ -47,14 +138,33 @@
               <div class="mini-card"><span>หอประชุมใหญ่</span><strong id="statsHall">1 ห้อง</strong></div>
             </div>
           </div>
+
           <div class="dashboard-grid">
-            <div class="panel"><h3>สมัครสมาชิก</h3><p>ลูกค้าสามารถสมัครสมาชิกใหม่ พร้อมยืนยัน OTP และเข้าสู่ระบบ</p><button class="primary-btn" data-target="registerPanel">ไปที่สมัครสมาชิก</button></div>
-            <div class="panel"><h3>ค้นหาห้องว่าง</h3><p>ตรวจสอบความว่างตามประเภทห้องและช่วงวันที่</p><button class="primary-btn" data-target="searchPanel">ค้นหาห้อง</button></div>
-            <div class="panel"><h3>ชำระมัดจำ</h3><p>ตรวจสอบสถานะการจองและแจ้งชำระเงิน</p><button class="primary-btn" data-target="historyPanel">ประวัติการจอง</button></div>
+            <div class="panel">
+              <h3>สมัครสมาชิก</h3>
+              <p>ลูกค้าสามารถสมัครสมาชิกใหม่ พร้อมยืนยัน OTP และเข้าสู่ระบบ</p>
+              <button class="primary-btn" data-target="registerPanel">ไปที่สมัครสมาชิก</button>
+            </div>
+            <div class="panel">
+              <h3>ค้นหาห้องว่าง</h3>
+              <p>ตรวจสอบความว่างตามประเภทห้องและช่วงวันที่</p>
+              <button class="primary-btn" data-target="searchPanel">ค้นหาห้อง</button>
+            </div>
+            <div class="panel">
+              <h3>ชำระมัดจำ</h3>
+              <p>ตรวจสอบสถานะการจองและแจ้งชำระเงิน</p>
+              <button class="primary-btn" data-target="historyPanel">ประวัติการจอง</button>
+            </div>
           </div>
         </section>
 
         <section id="screen-auth" class="screen">
+          <div class="auth-hero">
+            <span class="eyebrow">SECURE ACCESS</span>
+            <h1>เข้าสู่ระบบทักษิณาคาร</h1>
+            <p>เลือกประเภทการใช้งานก่อนเข้าสู่ระบบ ระบบจะพาไปยังหน้าที่เหมาะสมโดยอัตโนมัติ</p>
+          </div>
+
           <div class="auth-grid">
             <div class="card auth-card">
               <h2>สมัครสมาชิกฝั่งลูกค้า</h2>
@@ -69,57 +179,156 @@
               <div id="registerStatus" class="status-box"></div>
             </div>
 
-            <div class="card auth-card">
+            <div class="card auth-card primary-auth">
               <h2>เข้าสู่ระบบ</h2>
+
+              <div class="role-switch">
+                <button type="button" class="role-option active" data-role="customer">👤 ลูกค้า</button>
+                <button type="button" class="role-option" data-role="staff">🛡️ เจ้าหน้าที่</button>
+              </div>
+
+              <div id="roleHint" class="role-hint">
+                <strong>เข้าสู่ระบบลูกค้า</strong><br />
+                ใช้เพื่อค้นหา จองห้อง และติดตามประวัติการจอง
+              </div>
+
               <form id="loginForm">
+                <input type="hidden" id="loginRole" value="customer" />
                 <div class="form-row">
-                  <label>ประเภทผู้ใช้งาน</label>
-                  <select id="loginRole">
-                    <option value="customer">ลูกค้า</option>
-                    <option value="staff">เจ้าหน้าที่</option>
-                  </select>
+                  <label id="identityLabel">อีเมล / เบอร์โทร</label>
+                  <input type="text" id="loginIdentity" value="demo@taksin.ac.th" required />
                 </div>
-                <div class="form-row"><label>อีเมล / เบอร์โทร / ชื่อผู้ใช้</label><input type="text" id="loginIdentity" value="demo@taksin.ac.th" required /></div>
-                <div class="form-row"><label>รหัสผ่าน</label><input type="password" id="loginPassword" value="123456" required /></div>
-                <button type="submit" class="primary-btn full-width">เข้าสู่ระบบตามประเภทผู้ใช้งาน</button>
+                <div class="form-row">
+                  <label>รหัสผ่าน</label>
+                  <input type="password" id="loginPassword" value="123456" required />
+                </div>
+                <button type="submit" class="primary-btn full-width login-submit">เข้าสู่ระบบลูกค้า</button>
               </form>
+
               <div id="loginStatus" class="status-box"></div>
+
+              <div class="auth-divider">หรือยืนยันตัวตน</div>
+
               <div class="otp-box">
                 <h3>ยืนยัน OTP ลูกค้า</h3>
-                <div class="inline-row"><input type="text" id="otpInput" placeholder="กรอกรหัส OTP" /><button type="button" class="secondary-btn" id="verifyOtpButton">ยืนยัน</button></div>
+                <div class="inline-row">
+                  <input type="text" id="otpInput" placeholder="กรอกรหัส OTP" />
+                  <button type="button" class="secondary-btn" id="verifyOtpButton">ยืนยัน</button>
+                </div>
                 <small>รหัส OTP ตัวอย่าง: <strong>123456</strong></small>
               </div>
-              <div class="panel" style="margin-top:18px;padding:14px;background:#f8faff;box-shadow:none">
-                <strong>บัญชีเจ้าหน้าที่สำหรับทดลอง</strong><br />ชื่อผู้ใช้: <code>staff</code><br />รหัสผ่าน: <code>123456</code>
+
+              <div class="role-hint">
+                <strong>บัญชีเจ้าหน้าที่สำหรับทดลอง</strong><br />
+                ชื่อผู้ใช้: <code>staff</code> &nbsp; รหัสผ่าน: <code>123456</code>
               </div>
             </div>
           </div>
         </section>
 
         <section id="screen-search" class="screen">
-          <div class="card"><h2>ค้นหาห้องว่าง</h2><form id="searchForm" class="search-form"><div class="form-grid"><div class="form-row"><label>ประเภทห้อง</label><select id="searchType"><option value="all">ทั้งหมด</option><option value="room">ห้องพัก</option><option value="meeting">ห้องประชุม</option><option value="hall">หอประชุมใหญ่</option></select></div><div class="form-row"><label>วันที่เริ่ม</label><input type="date" id="searchStartDate" /></div><div class="form-row"><label>วันที่สิ้นสุด</label><input type="date" id="searchEndDate" /></div><div class="form-row"><label>&nbsp;</label><button type="submit" class="primary-btn full-width">ค้นหา</button></div></div></form></div>
-          <div class="results-header"><h3>รายการห้องที่ว่าง</h3></div><div id="roomResults" class="room-grid"></div>
+          <div class="card">
+            <h2>ค้นหาห้องว่าง</h2>
+            <form id="searchForm" class="search-form">
+              <div class="form-grid">
+                <div class="form-row">
+                  <label>ประเภทห้อง</label>
+                  <select id="searchType">
+                    <option value="all">ทั้งหมด</option>
+                    <option value="room">ห้องพัก</option>
+                    <option value="meeting">ห้องประชุม</option>
+                    <option value="hall">หอประชุมใหญ่</option>
+                  </select>
+                </div>
+                <div class="form-row">
+                  <label>วันที่เริ่ม</label>
+                  <input type="date" id="searchStartDate" />
+                </div>
+                <div class="form-row">
+                  <label>วันที่สิ้นสุด</label>
+                  <input type="date" id="searchEndDate" />
+                </div>
+                <div class="form-row">
+                  <label>&nbsp;</label>
+                  <button type="submit" class="primary-btn full-width">ค้นหา</button>
+                </div>
+              </div>
+            </form>
+          </div>
+
+          <div class="results-header">
+            <h3>รายการห้องที่ว่าง</h3>
+          </div>
+          <div id="roomResults" class="room-grid"></div>
         </section>
-        <section id="screen-booking" class="screen"><div class="booking-layout"><div class="card booking-panel"><h2>แบบฟอร์มการจอง</h2><div id="bookingFormContainer"></div></div><div class="card invoice-panel"><h2>ใบเสนอราคา / ใบแจ้งมัดจำ</h2><div id="invoiceContainer"></div></div></div></section>
-        <section id="screen-history" class="screen"><div class="card"><h2>ประวัติการจอง</h2><div id="historyList" class="history-list"></div></div></section>
+
+        <section id="screen-booking" class="screen">
+          <div class="booking-layout">
+            <div class="card booking-panel">
+              <h2>แบบฟอร์มการจอง</h2>
+              <div id="bookingFormContainer"></div>
+            </div>
+            <div class="card invoice-panel">
+              <h2>ใบเสนอราคา / ใบแจ้งมัดจำ</h2>
+              <div id="invoiceContainer"></div>
+            </div>
+          </div>
+        </section>
+
+        <section id="screen-history" class="screen">
+          <div class="card">
+            <h2>ประวัติการจอง</h2>
+            <div id="historyList" class="history-list"></div>
+          </div>
+        </section>
       </main>
     </div>
+
     <script src="script.js"></script>
     <script>
-      // ตัวเลือกบทบาทใช้ร่วมกับระบบลูกค้าเดิม และพาเจ้าหน้าที่ไปยัง Staff Portal
-      const loginForm = document.getElementById('loginForm');
-      loginForm.addEventListener('submit', function (event) {
-        if (document.getElementById('loginRole').value !== 'staff') return;
+      const roleButtons = document.querySelectorAll('.role-option');
+      const roleInput = document.getElementById('loginRole');
+      const roleHint = document.getElementById('roleHint');
+      const loginButton = document.querySelector('.login-submit');
+      const identityLabel = document.getElementById('identityLabel');
+
+      roleButtons.forEach((button) => {
+        button.addEventListener('click', () => {
+          const role = button.dataset.role;
+          roleInput.value = role;
+
+          roleButtons.forEach((item) => item.classList.toggle('active', item === button));
+
+          if (role === 'staff') {
+            roleHint.innerHTML = '<strong>เข้าสู่ระบบเจ้าหน้าที่</strong><br />จัดการการจอง สลิป ลูกค้า ห้องพัก รายงาน และการแจ้งเตือน';
+            loginButton.textContent = 'เข้าสู่ระบบเจ้าหน้าที่';
+            identityLabel.textContent = 'ชื่อผู้ใช้';
+            document.getElementById('loginIdentity').value = 'staff';
+          } else {
+            roleHint.innerHTML = '<strong>เข้าสู่ระบบลูกค้า</strong><br />ใช้เพื่อค้นหา จองห้อง และติดตามประวัติการจอง';
+            loginButton.textContent = 'เข้าสู่ระบบลูกค้า';
+            identityLabel.textContent = 'อีเมล / เบอร์โทร';
+            document.getElementById('loginIdentity').value = 'demo@taksin.ac.th';
+          }
+        });
+      });
+
+      document.getElementById('loginForm').addEventListener('submit', (event) => {
+        if (roleInput.value !== 'staff') return;
+
         event.preventDefault();
+
         const identity = document.getElementById('loginIdentity').value.trim();
         const password = document.getElementById('loginPassword').value;
-        const valid = (identity === 'staff' || identity === 'admin' || identity === 'เจ้าหน้าที่') && password === '123456';
         const status = document.getElementById('loginStatus');
-        if (valid) {
+
+        if ((identity === 'staff' || identity === 'admin' || identity === 'เจ้าหน้าที่') && password === '123456') {
           sessionStorage.setItem('taksinakan_staff_logged_in', 'true');
           status.className = 'status-box success';
           status.textContent = 'เข้าสู่ระบบเจ้าหน้าที่สำเร็จ กำลังเปิด Staff Portal...';
-          setTimeout(() => { window.location.href = 'staff.html'; }, 400);
+          setTimeout(() => {
+            window.location.href = 'staff.html';
+          }, 400);
         } else {
           status.className = 'status-box error';
           status.textContent = 'ชื่อผู้ใช้หรือรหัสผ่านเจ้าหน้าที่ไม่ถูกต้อง';
