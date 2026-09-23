@@ -1,153 +1,380 @@
-const state = {
-  user: JSON.parse(localStorage.getItem('taksinakan_user') || 'null'),
-  bookings: JSON.parse(localStorage.getItem('taksinakan_bookings') || '[]'),
-  selectedRoom: null,
+const STORAGE_KEYS = {
+  user: 'taksinaka_user',
+  bookings: 'taksinaka_bookings'
 };
 
 const rooms = [
-  { id: 'P101', name: 'ห้องพักเดี่ยว P101', category: 'room', type: 'ธรรมดา', price: 1200, detail: 'พักได้ 1-2 คน พร้อมเครื่องปรับอากาศ' },
-  { id: 'P102', name: 'ห้องพักพรีเมียม P102', category: 'room', type: 'พรีเมียม', price: 1800, detail: 'ห้องพักพรีเมียม พร้อมอาหารเช้า' },
-  { id: 'M101', name: 'ห้องประชุม M101', category: 'meeting', type: 'ห้องประชุมเล็ก', price: 1500, detail: 'รองรับ 10 คน พร้อมจอแสดงผลและ Wi-Fi' },
-  { id: 'M201', name: 'ห้องประชุม M201', category: 'meeting', type: 'ห้องประชุมกลาง', price: 2800, detail: 'รองรับ 25 คน พร้อมอุปกรณ์ประชุม' },
-  { id: 'H01', name: 'หอประชุมใหญ่ H01', category: 'hall', type: 'หอประชุมใหญ่', price: 30000, detail: 'เหมาะสำหรับงานประชุม งานแต่ง และงานพิธี' },
+  { id: 'P101', name: 'ห้องพัก 101', category: 'room', type: 'ห้องพัก', price: 1200, detail: 'ห้องพักคู่ 1-2 คน' },
+  { id: 'P102', name: 'ห้องพัก 102', category: 'room', type: 'ห้องพัก', price: 1800, detail: 'ห้องพักเดี่ยว 1-2 คน' },
+  { id: 'M101', name: 'ห้องประชุม M101', category: 'meeting', type: 'ห้องประชุม', price: 1500, detail: 'ห้องประชุมขนาดเล็ก 10-12 คน' },
+  { id: 'M201', name: 'ห้องประชุม M201', category: 'meeting', type: 'ห้องประชุม', price: 2200, detail: 'ห้องประชุมขนาดกลาง 20-25 คน' },
+  { id: 'H01', name: 'หอประชุมใหญ่', category: 'hall', type: 'หอประชุมใหญ่', price: 3500, detail: 'หอประชุมสำหรับการจัดงานใหญ่' }
 ];
+
+const state = {
+  user: JSON.parse(localStorage.getItem(STORAGE_KEYS.user) || 'null'),
+  bookings: JSON.parse(localStorage.getItem(STORAGE_KEYS.bookings) || '[]'),
+  selectedRoom: rooms[0],
+  selectedPayment: 'deposit'
+};
 
 const $ = (id) => document.getElementById(id);
 
-function save() {
-  localStorage.setItem('taksinakan_user', JSON.stringify(state.user));
-  localStorage.setItem('taksinakan_bookings', JSON.stringify(state.bookings));
+function saveState() {
+  localStorage.setItem(STORAGE_KEYS.user, JSON.stringify(state.user));
+  localStorage.setItem(STORAGE_KEYS.bookings, JSON.stringify(state.bookings));
+}
+
+function setStatus(id, message, type = 'info') {
+  const el = $(id);
+  if (!el) return;
+  el.className = 'status-box';
+  if (type === 'success') el.classList.add('success');
+  if (type === 'error') el.classList.add('error');
+  if (type === 'info') el.classList.add('info');
+  el.textContent = message;
+}
+
+function updateUserBadge() {
+  const badge = $('userBadge');
+  const loginButton = $('loginButton');
+  const logoutButton = $('logoutButton');
+
+  if (!badge || !loginButton || !logoutButton) return;
+
+  if (state.user) {
+    badge.textContent = `${state.user.name} (${state.user.role})`;
+    loginButton.style.display = 'none';
+    logoutButton.style.display = 'inline-flex';
+  } else {
+    badge.textContent = 'ยังไม่ได้เข้าสู่ระบบ';
+    loginButton.style.display = 'inline-flex';
+    logoutButton.style.display = 'none';
+  }
 }
 
 function showView(view) {
   document.querySelectorAll('.screen').forEach((screen) => {
     screen.classList.toggle('active', screen.id === `screen-${view}`);
   });
-  document.querySelectorAll('[data-view]').forEach((button) => {
+
+  document.querySelectorAll('.nav-btn').forEach((button) => {
     button.classList.toggle('active', button.dataset.view === view);
   });
-  if (view === 'search') renderRooms();
-  if (view === 'history') renderHistory();
-  if (view === 'booking') renderBooking();
 }
 
-function setStatus(id, message, type = 'info') {
-  const box = $(id);
-  if (box) {
-    box.className = `status-box ${type}`;
-    box.textContent = message;
+function getRoleMeta(role) {
+  const map = {
+    customer: {
+      title: 'เข้าสู่ระบบลูกค้า',
+      label: 'ลูกค้า',
+      description: 'ค้นหา จองห้อง และติดตามประวัติการจอง',
+      email: 'demo@taksin.ac.th'
+    },
+    staff: {
+      title: 'เข้าสู่ระบบเจ้าหน้าที่',
+      label: 'เจ้าหน้าที่',
+      description: 'จัดการห้องพักและห้องประชุม',
+      email: 'staff@taksin.ac.th'
+    },
+    approver: {
+      title: 'เข้าสู่ระบบผู้อนุมัติ',
+      label: 'ผู้อนุมัติ',
+      description: 'ตรวจสอบและอนุมัติการจอง',
+      email: 'approver@taksin.ac.th'
+    },
+    housekeeping: {
+      title: 'เข้าสู่ระบบแม่บ้าน',
+      label: 'แม่บ้าน',
+      description: 'ดูความพร้อมและทำความสะอาดห้อง',
+      email: 'housekeeping@taksin.ac.th'
+    }
+  };
+
+  return map[role] || map.customer;
+}
+
+function bindRoleSwitch() {
+  const roleButtons = document.querySelectorAll('.role-option');
+  const roleInput = $('loginRole');
+  const hint = $('roleHint');
+  const loginSubmit = document.querySelector('.login-submit');
+
+  if (!roleButtons.length || !roleInput || !hint || !loginSubmit) return;
+
+  const applyRole = (role) => {
+    const meta = getRoleMeta(role);
+    roleButtons.forEach((button) => {
+      button.classList.toggle('active', button.dataset.role === role);
+    });
+
+    roleInput.value = role;
+    hint.innerHTML = `<strong>${meta.title}</strong><br />${meta.description}`;
+    const label = `เข้าสู่ระบบ${meta.label}`;
+    loginSubmit.textContent = label;
+    $('identityLabel').textContent = role === 'customer' ? 'อีเมล / เบอร์โทร' : 'ชื่อผู้ใช้ / อีเมล';
+    if (role === 'customer') {
+      $('loginIdentity').value = meta.email;
+    } else {
+      $('loginIdentity').value = meta.email;
+    }
+  };
+
+  roleButtons.forEach((button) => {
+    button.addEventListener('click', () => applyRole(button.dataset.role));
+  });
+
+  applyRole('customer');
+}
+
+function getPaymentOptions(room) {
+  const base = Number(room.price || 0);
+  if (room.category === 'room' || room.category === 'meeting') {
+    return [
+      { value: 'deposit', label: 'ชำระมัดจำ 30%', amount: base * 0.3, status: 'รอชำระมัดจำ' },
+      { value: 'full', label: 'ชำระเต็ม 100%', amount: base, status: 'ชำระเต็มแล้ว' },
+      { value: 'counter', label: 'ชำระที่เคาน์เตอร์', amount: base, status: 'รอชำระที่เคาน์เตอร์' }
+    ];
   }
+
+  return [
+    { value: 'deposit', label: 'ชำระมัดจำ 30%', amount: base * 0.3, status: 'รอชำระมัดจำ' },
+    { value: 'full', label: 'ชำระเต็ม 100%', amount: base, status: 'ชำระเต็มแล้ว' }
+  ];
 }
 
-function updateUser() {
-  $('userBadge').textContent = state.user ? `ผู้ใช้: ${state.user.name}` : 'ยังไม่ได้เข้าสู่ระบบ';
-  $('loginButton').style.display = state.user ? 'none' : 'inline-block';
-  $('logoutButton').style.display = state.user ? 'inline-block' : 'none';
+function renderInvoice(room, paymentMethod = 'deposit') {
+  const invoice = $('invoiceContainer');
+  if (!invoice) return;
+
+  const options = getPaymentOptions(room);
+  const selected = options.find((item) => item.value === paymentMethod) || options[0];
+  const total = Number(room.price || 0);
+
+  invoice.innerHTML = `
+    <div class="invoice-box">
+      <div class="invoice-header">
+        <strong>${room.name}</strong>
+        <span>${room.type}</span>
+      </div>
+      <div class="invoice-line"><span>ราคาห้อง</span><strong>${total.toLocaleString()} บาท</strong></div>
+      <div class="invoice-line"><span>วิธีชำระ</span><strong>${selected.label}</strong></div>
+      <div class="invoice-line"><span>ยอดที่ต้องชำระ</span><strong>${selected.amount.toLocaleString()} บาท</strong></div>
+      <div class="invoice-line"><span>สถานะ</span><strong class="status-pill">${selected.status}</strong></div>
+    </div>
+  `;
+}
+
+function renderBookingForm() {
+  const container = $('bookingFormContainer');
+  if (!container) return;
+
+  const room = state.selectedRoom || rooms[0];
+  const options = getPaymentOptions(room);
+  const paymentMarkup = options.map((option) => `
+    <button type="button"
+      class="payment-option ${state.selectedPayment === option.value ? 'selected' : ''}"
+      data-payment="${option.value}">
+      <span>${option.label}</span>
+      <strong>${option.amount.toLocaleString()} บาท</strong>
+    </button>
+  `).join('');
+
+  container.innerHTML = `
+    <form id="bookingForm">
+      <div class="form-row">
+        <label>ห้องที่เลือก</label>
+        <input value="${room.name}" readonly />
+      </div>
+      <div class="form-row">
+        <label>วันที่เข้าพัก / ใช้ห้อง</label>
+        <input type="date" id="bookingDate" value="${new Date(Date.now() + 86400000).toISOString().slice(0, 10)}" />
+      </div>
+      <div class="form-row">
+        <label>จำนวนคืน / ชั่วโมง</label>
+        <input type="number" id="bookingDuration" min="1" value="1" />
+      </div>
+      <div class="payment-wrap">
+        <label>วิธีชำระเงิน</label>
+        <div class="payment-options">${paymentMarkup}</div>
+      </div>
+      <button class="primary-btn full-width" type="submit">ยืนยันการจอง</button>
+    </form>
+  `;
+
+  container.querySelectorAll('.payment-option').forEach((button) => {
+    button.addEventListener('click', () => {
+      state.selectedPayment = button.dataset.payment;
+      renderBookingForm();
+      renderInvoice(room, state.selectedPayment);
+    });
+  });
+
+  const form = $('bookingForm');
+  if (form) {
+    form.addEventListener('submit', (event) => {
+      event.preventDefault();
+      const booking = {
+        id: `BK-${Date.now()}`,
+        roomId: room.id,
+        roomName: room.name,
+        type: room.type,
+        date: $('bookingDate').value,
+        duration: Number($('bookingDuration').value || 1),
+        paymentMethod: state.selectedPayment,
+        paymentStatus: getPaymentOptions(room).find((item) => item.value === state.selectedPayment)?.status || 'รอชำระมัดจำ',
+        amount: getPaymentOptions(room).find((item) => item.value === state.selectedPayment)?.amount || room.price,
+        status: 'รอดำเนินการ'
+      };
+
+      state.bookings.unshift(booking);
+      saveState();
+      renderHistory();
+      showView('history');
+      setStatus('loginStatus', 'จองห้องสำเร็จแล้ว', 'success');
+    });
+  }
+
+  renderInvoice(room, state.selectedPayment);
 }
 
 function renderRooms() {
-  const type = $('searchType')?.value || 'all';
-  const list = rooms.filter((room) => type === 'all' || room.category === type);
-  $('roomResults').innerHTML = list.map((room) => `
-    <article class="room-card">
-      <div class="room-header"><h3>${room.name}</h3><span class="room-type">${label(room.category)}</span></div>
-      <div class="room-price">฿${room.price.toLocaleString()} / ${room.category === 'room' ? 'คืน' : 'วัน'}</div>
-      <div class="room-meta"><div>ประเภท: ${room.type}</div><div>${room.detail}</div></div>
-      <div class="card-actions"><button class="primary-btn choose-room" data-id="${room.id}">เลือกห้อง</button></div>
-    </article>
+  const results = $('roomResults');
+  if (!results) return;
+
+  const type = $('searchType') ? $('searchType').value : 'all';
+  const start = $('searchStartDate') ? $('searchStartDate').value : '';
+  const end = $('searchEndDate') ? $('searchEndDate').value : '';
+
+  const filtered = rooms.filter((room) => {
+    const matchesType = type === 'all' || room.category === type;
+    const matchesDate = !start || !end || true;
+    return matchesType && matchesDate;
+  });
+
+  results.innerHTML = filtered.map((room) => `
+    <div class="room-card">
+      <div class="room-card-header">
+        <h4>${room.name}</h4>
+        <span class="tag">${room.type}</span>
+      </div>
+      <p>${room.detail}</p>
+      <div class="room-meta">
+        <strong>${room.price.toLocaleString()} บาท</strong>
+        <span>ว่าง</span>
+      </div>
+      <button class="primary-btn" type="button" data-room-id="${room.id}">เลือกห้อง</button>
+    </div>
   `).join('');
-  document.querySelectorAll('.choose-room').forEach((button) => {
+
+  results.querySelectorAll('[data-room-id]').forEach((button) => {
     button.addEventListener('click', () => {
-      state.selectedRoom = rooms.find((room) => room.id === button.dataset.id);
+      const room = rooms.find((item) => item.id === button.dataset.roomId) || rooms[0];
+      state.selectedRoom = room;
+      renderBookingForm();
       showView('booking');
     });
   });
 }
 
-function renderBooking() {
-  const container = $('bookingFormContainer');
-  const room = state.selectedRoom;
-  if (!room) {
-    container.innerHTML = '<p>กรุณาเลือกห้องจากหน้าค้นหาห้องว่างก่อน</p><button class="primary-btn" id="goSearch">ค้นหาห้องว่าง</button>';
-    $('invoiceContainer').innerHTML = '';
-    $('goSearch').onclick = () => showView('search');
-    return;
-  }
-  const user = state.user || {};
-  container.innerHTML = `
-    <div class="booking-section"><h3>ห้องที่เลือก: ${room.name}</h3><p>${room.detail}</p></div>
-    <div class="booking-section"><h3>ข้อมูลการจอง</h3>
-      <div class="form-row"><label>วันที่ต้องการ</label><input id="bookingDate" type="date" value="${new Date().toISOString().slice(0, 10)}"></div>
-      <div class="form-row"><label>ชื่อ-นามสกุล</label><input id="bookingName" value="${user.name || ''}"></div>
-      <div class="form-row"><label>เบอร์โทรศัพท์</label><input id="bookingPhone" value="${user.phone || ''}"></div>
-      ${room.category === 'meeting' ? '<div class="form-row"><label>รายละเอียดงาน</label><textarea id="bookingDetail" rows="3" placeholder="เช่น ประชุมโครงการ"></textarea></div>' : ''}
-    </div>
-    <button class="primary-btn full-width" id="createBooking">สร้างใบเสนอราคาและมัดจำ 30%</button>`;
-  const deposit = Math.round(room.price * 0.3);
-  $('invoiceContainer').innerHTML = `<div class="invoice-box"><p>เลือกห้องแล้ว: <strong>${room.name}</strong></p><div class="invoice-row"><span>ราคาเต็ม</span><span>฿${room.price.toLocaleString()}</span></div><div class="invoice-row total"><span>มัดจำ 30%</span><span>฿${deposit.toLocaleString()}</span></div></div>`;
-  $('createBooking').onclick = createBooking;
-}
-
-function createBooking() {
-  if (!state.user) {
-    alert('กรุณาเข้าสู่ระบบก่อนทำการจอง');
-    showView('auth');
-    return;
-  }
-  const room = state.selectedRoom;
-  const amount = room.price;
-  const booking = {
-    id: `BK-${Date.now().toString().slice(-6)}`,
-    roomName: room.name,
-    category: room.category,
-    date: $('bookingDate').value,
-    name: $('bookingName').value || state.user.name,
-    amount,
-    deposit: Math.round(amount * 0.3),
-    status: 'รอชำระมัดจำ',
-  };
-  state.bookings.unshift(booking);
-  save();
-  renderInvoice(booking);
-  alert(`สร้างรายการจอง ${booking.id} เรียบร้อยแล้ว`);
-}
-
-function renderInvoice(booking) {
-  $('invoiceContainer').innerHTML = `<div class="invoice-box"><h3>ใบแจ้งมัดจำ</h3><div class="invoice-row"><span>รหัสการจอง</span><strong>${booking.id}</strong></div><div class="invoice-row"><span>ห้อง</span><span>${booking.roomName}</span></div><div class="invoice-row total"><span>ยอดมัดจำ 30%</span><span>฿${booking.deposit.toLocaleString()}</span></div><div class="payment-box"><h4>ช่องทางชำระเงิน</h4><div class="bank-box">ธนาคารกสิกรไทย<br>เลขบัญชี 123-4-56789-0</div><div class="qr-box">QR CODE</div><button class="primary-btn full-width" id="paidButton">แจ้งชำระเงิน</button></div></div>`;
-  $('paidButton').onclick = () => {
-    booking.status = 'รอตรวจสอบการชำระเงิน';
-    save();
-    alert('แจ้งชำระเงินแล้ว เจ้าหน้าที่จะตรวจสอบสลิป');
-    showView('history');
-  };
-}
-
 function renderHistory() {
-  if (!state.user) {
-    $('historyList').innerHTML = '<p>กรุณาเข้าสู่ระบบเพื่อดูประวัติการจอง</p>';
-    return;
-  }
+  const historyList = $('historyList');
+  if (!historyList) return;
+
   if (!state.bookings.length) {
-    $('historyList').innerHTML = '<p>ยังไม่มีรายการจอง</p>';
+    historyList.innerHTML = '<div class="empty-state">ยังไม่มีประวัติการจอง</div>';
     return;
   }
-  $('historyList').innerHTML = state.bookings.map((booking) => `<article class="history-item"><div class="history-top"><strong>${booking.roomName}</strong><span class="badge pending">${booking.status}</span></div><div class="meta-grid"><div>รหัส: ${booking.id}</div><div>วันที่: ${booking.date}</div><div>ยอดเต็ม: ฿${booking.amount.toLocaleString()}</div><div>มัดจำ: ฿${booking.deposit.toLocaleString()}</div></div><div class="card-actions"><button class="secondary-btn notify-payment" data-id="${booking.id}">แจ้งชำระเงิน</button><button class="ghost-btn cancel-booking" data-id="${booking.id}">ยกเลิก</button></div></article>`).join('');
-  document.querySelectorAll('.notify-payment').forEach((button) => button.onclick = () => { const booking = state.bookings.find((item) => item.id === button.dataset.id); booking.status = 'รอตรวจสอบการชำระเงิน'; save(); renderHistory(); });
-  document.querySelectorAll('.cancel-booking').forEach((button) => button.onclick = () => { const booking = state.bookings.find((item) => item.id === button.dataset.id); booking.status = 'ยกเลิกแล้ว'; save(); renderHistory(); });
+
+  historyList.innerHTML = state.bookings.map((booking) => `
+    <div class="history-item">
+      <div>
+        <strong>${booking.roomName}</strong>
+        <small>${booking.type}</small>
+      </div>
+      <div class="history-meta">
+        <span>${booking.paymentStatus}</span>
+        <strong>${booking.amount.toLocaleString()} บาท</strong>
+      </div>
+    </div>
+  `).join('');
 }
 
-function label(category) {
-  return category === 'room' ? 'ห้องพัก' : category === 'meeting' ? 'ห้องประชุม' : 'หอประชุมใหญ่';
+function bindAuthentication() {
+  $('loginButton')?.addEventListener('click', () => showView('auth'));
+  $('logoutButton')?.addEventListener('click', () => {
+    state.user = null;
+    saveState();
+    updateUserBadge();
+    showView('home');
+  });
+
+  $('registerForm')?.addEventListener('submit', (event) => {
+    event.preventDefault();
+    const user = {
+      name: $('registerName').value,
+      email: $('registerEmail').value,
+      phone: $('registerPhone').value,
+      password: $('registerPassword').value,
+      role: 'customer'
+    };
+
+    state.user = user;
+    saveState();
+    updateUserBadge();
+    setStatus('registerStatus', 'สมัครสมาชิกสำเร็จ กรุณาเข้าสู่ระบบต่อ', 'success');
+    showView('auth');
+  });
+
+  $('loginForm')?.addEventListener('submit', (event) => {
+    event.preventDefault();
+    const role = $('loginRole').value;
+    const identity = $('loginIdentity').value.trim();
+    const password = $('loginPassword').value.trim();
+    const validEmail = getRoleMeta(role).email;
+
+    if (identity === validEmail && password === '123456') {
+      state.user = {
+        name: role === 'customer' ? 'Demo Customer' : getRoleMeta(role).label,
+        email: validEmail,
+        role
+      };
+      saveState();
+      updateUserBadge();
+      setStatus('loginStatus', 'เข้าสู่ระบบสำเร็จ', 'success');
+      showView('home');
+    } else {
+      setStatus('loginStatus', 'อีเมลหรือรหัสผ่านไม่ถูกต้อง', 'error');
+    }
+  });
+
+  $('searchForm')?.addEventListener('submit', (event) => {
+    event.preventDefault();
+    renderRooms();
+  });
+
+  document.querySelectorAll('[data-view]').forEach((button) => {
+    button.addEventListener('click', () => showView(button.dataset.view));
+  });
+
+  document.querySelectorAll('[data-target]').forEach((button) => {
+    button.addEventListener('click', () => {
+      const target = button.dataset.target;
+      if (target === 'registerPanel') showView('auth');
+      if (target === 'searchPanel') showView('search');
+      if (target === 'historyPanel') showView('history');
+    });
+  });
 }
 
-$('loginButton').onclick = () => showView('auth');
-$('logoutButton').onclick = () => { state.user = null; save(); updateUser(); showView('home'); };
-document.querySelectorAll('[data-view]').forEach((button) => button.onclick = () => showView(button.dataset.view));
-document.querySelectorAll('[data-target]').forEach((button) => button.onclick = () => showView(button.dataset.target === 'registerPanel' ? 'auth' : button.dataset.target === 'searchPanel' ? 'search' : 'history'));
-$('searchForm').onsubmit = (event) => { event.preventDefault(); renderRooms(); };
-$('registerForm').onsubmit = (event) => { event.preventDefault(); const user = { name: $('registerName').value, email: $('registerEmail').value, phone: $('registerPhone').value, password: $('registerPassword').value }; state.user = user; save(); updateUser(); setStatus('registerStatus', 'สมัครสมาชิกสำเร็จ กรุณากรอก OTP 123456 เพื่อยืนยันตัวตน', 'success'); };
-$('loginForm').onsubmit = (event) => { event.preventDefault(); const identity = $('loginIdentity').value; const password = $('loginPassword').value; if ((identity === 'demo@taksin.ac.th' || identity === '0999999999') && password === '123456') { state.user = { name: 'สมชาย ใจดี', email: 'demo@taksin.ac.th', phone: '0999999999' }; save(); updateUser(); setStatus('loginStatus', 'เข้าสู่ระบบสำเร็จ', 'success'); showView('search'); } else setStatus('loginStatus', 'ข้อมูลเข้าสู่ระบบไม่ถูกต้อง', 'error'); };
-$('verifyOtpButton').onclick = () => $('otpInput').value === '123456' ? setStatus('loginStatus', 'ยืนยัน OTP สำเร็จ', 'success') : setStatus('loginStatus', 'OTP ไม่ถูกต้อง', 'error');
+function init() {
+  bindRoleSwitch();
+  bindAuthentication();
+  renderRooms();
+  renderBookingForm();
+  renderHistory();
+  updateUserBadge();
+  showView('home');
+}
 
-updateUser();
-showView('home');
+document.addEventListener('DOMContentLoaded', init);
