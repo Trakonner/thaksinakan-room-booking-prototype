@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Staff Portal | ทักษิณาคาร</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="staff.css" />
+</head>
+<body>
+  <div class="staff-shell">
+    <aside class="staff-sidebar">
+      <div class="staff-brand"><div class="brand-logo">T</div><div><strong>ทักษิณาคาร</strong><small>Staff Portal</small></div></div>
+      <nav id="staffNav">
+        <button class="staff-nav active" data-staff-view="dashboard">📊 Dashboard</button>
+        <button class="staff-nav" data-staff-view="bookings">📅 จัดการการจอง</button>
+        <button class="staff-nav" data-staff-view="customers">👥 ลูกค้า/ผู้เช่า</button>
+        <button class="staff-nav" data-staff-view="payments">💳 ตรวจสอบสลิป</button>
+        <button class="staff-nav" data-staff-view="documents">🧾 ใบเสนอราคา/ใบเสร็จ</button>
+        <button class="staff-nav" data-staff-view="resources">🏢 ห้องและอุปกรณ์</button>
+        <button class="staff-nav" data-staff-view="maintenance">🔧 แจ้งซ่อม</button>
+        <button class="staff-nav" data-staff-view="operations">⚠️ จองชนกัน/ผู้ดูแล</button>
+        <button class="staff-nav" data-staff-view="edoc">📨 E-doc</button>
+        <button class="staff-nav" data-staff-view="reports">📈 รายงาน</button>
+        <button class="staff-nav" data-staff-view="notifications">🔔 การแจ้งเตือน</button>
+      </nav>
+    </aside>
+    <main class="staff-main">
+      <header class="staff-header"><div><span class="eyebrow">STAFF PROTOTYPE</span><h1 id="staffTitle">Dashboard</h1></div><div class="staff-user">👤 เจ้าหน้าที่ระบบ <button class="secondary-btn" id="staffLogout">ออกจากระบบ</button></div></header>
+      <div id="staffContent"></div>
+    </main>
+  </div>
+  <div id="toast" class="staff-toast"></div>
+  <script src="staff.js"></script>
+</body>
+</html>
