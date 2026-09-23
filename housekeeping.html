@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Housekeeping Portal | ทักษิณาคาร</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="workflow.css" />
+</head>
+<body>
+  <div class="workflow-shell">
+    <header class="workflow-header">
+      <div class="brand-wrap"><div class="brand-logo">T</div><div><strong>ทักษิณาคาร</strong><small>Housekeeping Portal</small></div></div>
+      <div class="workflow-user">🧹 แม่บ้าน <button class="secondary-btn" onclick="location.href='index.html'">กลับหน้าหลัก</button></div>
+    </header>
+    <main class="workflow-main">
+      <div class="workflow-heading"><div><span class="eyebrow">HOUSEKEEPING PROTOTYPE</span><h1>อัปเดตสถานะความพร้อมของห้องพัก</h1><p>รับแจ้งเตือน เตรียมห้อง และแจ้งสถานะให้เจ้าหน้าที่กับลูกค้าทราบ</p></div><div class="workflow-stat"><span>ห้องรอเตรียม</span><strong id="readyCount">0</strong></div></div>
+      <section class="workflow-grid">
+        <div class="card"><h2>งานเตรียมห้อง</h2><div id="roomTaskList" class="workflow-list"></div></div>
+        <div class="card" id="roomDetail"><h2>รายละเอียดห้อง</h2><div class="workflow-empty">เลือกห้องจากรายการเพื่อเริ่มดำเนินการ</div></div>
+      </section>
+    </main>
+  </div>
+  <div id="workflowToast" class="workflow-toast"></div>
+  <script src="workflow.js"></script>
+</body>
+</html>

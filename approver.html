@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Approval Portal | ทักษิณาคาร</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="workflow.css" />
+</head>
+<body>
+  <div class="workflow-shell">
+    <header class="workflow-header">
+      <div class="brand-wrap"><div class="brand-logo">T</div><div><strong>ทักษิณาคาร</strong><small>Approval Portal</small></div></div>
+      <div class="workflow-user">✍️ ผู้อนุมัติ <button class="secondary-btn" onclick="location.href='index.html'">กลับหน้าหลัก</button></div>
+    </header>
+    <main class="workflow-main">
+      <div class="workflow-heading"><div><span class="eyebrow">APPROVER PROTOTYPE</span><h1>ตรวจสอบและอนุมัติหนังสือ</h1><p>ตรวจสอบรายละเอียด ลงนาม และส่งต่อหนังสือไปยังผู้อนุมัติลำดับถัดไป</p></div><div class="workflow-stat"><span>รอตรวจสอบ</span><strong id="pendingCount">0</strong></div></div>
+      <section class="workflow-grid">
+        <div class="card">
+          <h2>หนังสือที่รอการอนุมัติ</h2>
+          <div id="approvalList" class="workflow-list"></div>
+        </div>
+        <div class="card" id="approvalDetail">
+          <h2>รายละเอียดคำขอ</h2>
+          <div class="workflow-empty">เลือกหนังสือจากรายการเพื่อดูรายละเอียด</div>
+        </div>
+      </section>
+    </main>
+  </div>
+  <div id="workflowToast" class="workflow-toast"></div>
+  <script src="workflow.js"></script>
+</body>
+</html>
