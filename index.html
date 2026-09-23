@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="th">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ระบบจองห้องพักและห้องประชุม ทักษิณาคาร</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <div class="brand-wrap">
+          <div class="brand-logo">T</div>
+          <div>
+            <div class="brand-name">ทักษิณาคาร</div>
+            <small>ระบบจองห้องพักและห้องประชุม</small>
+          </div>
+        </div>
+
+        <nav class="main-nav">
+          <button class="nav-btn active" data-view="home">หน้าหลัก</button>
+          <button class="nav-btn" data-view="search">ค้นหาห้องว่าง</button>
+          <button class="nav-btn" data-view="booking">จองห้อง</button>
+          <button class="nav-btn" data-view="history">ประวัติการจอง</button>
+        </nav>
+
+        <div class="top-actions">
+          <span id="userBadge" class="user-badge">ยังไม่ได้เข้าสู่ระบบ</span>
+          <button class="primary-btn" id="loginButton">เข้าสู่ระบบ</button>
+          <button class="secondary-btn" id="logoutButton" style="display: none;">ออกจากระบบ</button>
+        </div>
+      </header>
+
+      <main class="content">
+        <section id="screen-home" class="screen active">
+          <div class="hero">
+            <div class="hero-text">
+              <span class="eyebrow">Prototype</span>
+              <h1>ระบบจองห้องพักและห้องประชุม</h1>
+              <p>
+                จองห้องพัก ห้องประชุม และหอประชุมใหญ่ได้อย่างรวดเร็ว
+                พร้อมระบบยืนยันตัวตน การชำระมัดจำ และติดตามสถานะการจอง
+              </p>
+              <div class="hero-actions">
+                <button class="primary-btn" data-view="search">ค้นหาห้องว่าง</button>
+                <button class="secondary-btn" data-view="booking">เริ่มจองทันที</button>
+              </div>
+            </div>
+            <div class="hero-panel">
+              <div class="mini-card">
+                <span>ห้องพัก</span>
+                <strong id="statsRooms">18 ห้อง</strong>
+              </div>
+              <div class="mini-card">
+                <span>ห้องประชุม</span>
+                <strong id="statsMeetings">8 ห้อง</strong>
+              </div>
+              <div class="mini-card">
+                <span>หอประชุมใหญ่</span>
+                <strong id="statsHall">1 ห้อง</strong>
+              </div>
+            </div>
+          </div>
+
+          <div class="dashboard-grid">
+            <div class="panel">
+              <h3>สมัครสมาชิก</h3>
+              <p>ลูกค้าสามารถสมัครสมาชิกใหม่ พร้อมยืนยัน OTP และเข้าสู่ระบบ</p>
+              <button class="primary-btn" data-target="registerPanel">ไปที่สมัครสมาชิก</button>
+            </div>
+            <div class="panel">
+              <h3>ค้นหาห้องว่าง</h3>
+              <p>ตรวจสอบความว่างแบบ real-time ตามประเภทห้องและช่วงวันที่</p>
+              <button class="primary-btn" data-target="searchPanel">ค้นหาห้อง</button>
+            </div>
+            <div class="panel">
+              <h3>ชำระมัดจำ</h3>
+              <p>เลือกโอนผ่านบัญชีธนาคารหรือ QR Code และอัปโหลดสลิปยืนยัน</p>
+              <button class="primary-btn" data-target="historyPanel">ประวัติการจอง</button>
+            </div>
+          </div>
+        </section>
+
+        <section id="screen-auth" class="screen">
+          <div class="auth-grid">
+            <div class="card auth-card">
+              <h2>สมัครสมาชิก</h2>
+              <form id="registerForm">
+                <div class="form-row">
+                  <label>ชื่อ-นามสกุล</label>
+                  <input type="text" id="registerName" required />
+                </div>
+                <div class="form-row">
+                  <label>อีเมล</label>
+                  <input type="email" id="registerEmail" required />
+                </div>
+                <div class="form-row">
+                  <label>เบอร์โทรศัพท์</label>
+                  <input type="tel" id="registerPhone" required />
+                </div>
+                <div class="form-row">
+                  <label>เลขบัตรประชาชน</label>
+                  <input type="text" id="registerIdCard" maxlength="13" required />
+                </div>
+                <div class="form-row">
+                  <label>ตั้งรหัสผ่าน</label>
+                  <input type="password" id="registerPassword" required />
+                </div>
+                <button type="submit" class="primary-btn full-width">สมัครสมาชิก</button>
+              </form>
+              <div id="registerStatus" class="status-box"></div>
+            </div>
+
+            <div class="card auth-card">
+              <h2>เข้าสู่ระบบ</h2>
+              <form id="loginForm">
+                <div class="form-row">
+                  <label>อีเมล / เบอร์โทร</label>
+                  <input type="text" id="loginIdentity" value="demo@taksin.ac.th" required />
+                </div>
+                <div class="form-row">
+                  <label>รหัสผ่าน</label>
+                  <input type="password" id="loginPassword" value="123456" required />
+                </div>
+                <button type="submit" class="primary-btn full-width">เข้าสู่ระบบ</button>
+              </form>
+              <div id="loginStatus" class="status-box"></div>
+
+              <div class="otp-box">
+                <h3>ยืนยัน OTP</h3>
+                <div class="inline-row">
+                  <input type="text" id="otpInput" placeholder="กรอกรหัส OTP" />
+                  <button class="secondary-btn" id="verifyOtpButton">ยืนยัน</button>
+                </div>
+                <small>รหัส OTP ตัวอย่าง: <strong>123456</strong></small>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section id="screen-search" class="screen">
+          <div class="card">
+            <h2>ค้นหาห้องว่าง</h2>
+            <form id="searchForm" class="search-form">
+              <div class="form-grid">
+                <div class="form-row">
+                  <label>ประเภทห้อง</label>
+                  <select id="searchType">
+                    <option value="all">ทั้งหมด</option>
+                    <option value="room">ห้องพัก</option>
+                    <option value="meeting">ห้องประชุม</option>
+                    <option value="hall">หอประชุมใหญ่</option>
+                  </select>
+                </div>
+                <div class="form-row">
+                  <label>วันที่เริ่ม</label>
+                  <input type="date" id="searchStartDate" />
+                </div>
+                <div class="form-row">
+                  <label>วันที่สิ้นสุด</label>
+                  <input type="date" id="searchEndDate" />
+                </div>
+                <div class="form-row">
+                  <label>&nbsp;</label>
+                  <button type="submit" class="primary-btn full-width">ค้นหา</button>
+                </div>
+              </div>
+            </form>
+          </div>
+
+          <div class="results-header">
+            <h3>รายการห้องที่ว่าง</h3>
+          </div>
+          <div id="roomResults" class="room-grid"></div>
+        </section>
+
+        <section id="screen-booking" class="screen">
+          <div class="booking-layout">
+            <div class="card booking-panel">
+              <h2>แบบฟอร์มการจอง</h2>
+              <div id="bookingFormContainer"></div>
+            </div>
+            <div class="card invoice-panel">
+              <h2>ใบเสนอราคา / ใบแจ้งมัดจำ</h2>
+              <div id="invoiceContainer"></div>
+            </div>
+          </div>
+        </section>
+
+        <section id="screen-history" class="screen">
+          <div class="card">
+            <h2>ประวัติการจอง</h2>
+            <div id="historyList" class="history-list"></div>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <script src="script.js"></script>
+  </body>
+</html>
